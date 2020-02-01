@@ -9,30 +9,49 @@ import {
 } from "semantic-ui-react";
 import { connect } from "react-redux";
 import { NavLink, Redirect } from "react-router-dom";
-import { authLogin } from "../store/actions/auth";
+import { authLogin as login } from "../store/actions/auth";
 
 class LoginForm extends React.Component {
   state = {
     username: "",
-    password: ""
+    password: "",
+    formError: null
   };
 
   handleChange = e => {
-    this.setState({ [e.target.name]: e.target.value });
+    this.setState({
+      [e.target.name]: e.target.value,
+      /* use to reset error messages when user begins typing */
+      formError: null
+    });
+
   };
 
   handleSubmit = e => {
     e.preventDefault();
+
     const { username, password } = this.state;
-    this.props.login(username, password);
+
+    /* used to verify all form fields were provided a value */
+    if (username !== '' && password !== '') {
+      this.props.login(username, password);
+    }
+    else {
+      this.setState({
+        formError: "Please enter all credentials (username & password)"
+      })
+    }
+
   };
 
   render() {
-    const { error, loading, token } = this.props;
-    const { username, password } = this.state;
-    if (token) {
+    const { error, loading, authenticated } = this.props;
+    const { username, password, formError } = this.state;
+
+    if (authenticated) {
       return <Redirect to="/" />;
     }
+
     return (
       <Grid
         textAlign="center"
@@ -79,6 +98,18 @@ class LoginForm extends React.Component {
                 </Button>
               </Segment>
             </Form>
+            {formError && (
+              <Message negative>
+                <Message.Header>A form error occurred</Message.Header>
+                <p>{formError}</p>
+              </Message>
+            )}
+            {error && (
+              <Message negative>
+                <Message.Header>An error occurred</Message.Header>
+                <p>{error}</p>
+              </Message>
+            )}
             <Message>
               New to us? <NavLink to="/signup">Sign Up</NavLink>
             </Message>
@@ -93,13 +124,14 @@ const mapStateToProps = state => {
   return {
     loading: state.auth.loading,
     error: state.auth.error,
-    token: state.auth.token
+    token: state.auth.token,
+    authenticated: state.auth.token !== null
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
-    login: (username, password) => dispatch(authLogin(username, password))
+    login: (username, password) => dispatch(login(username, password))
   };
 };
 
