@@ -18,6 +18,7 @@ class StripeForm extends React.Component {
     submit = ev => {
         ev.preventDefault();
         this.setState({ loading: true, error: null });
+        /* check if it exsists */
         if (this.props.stripe) {
             this.props.stripe.createToken().then(result => {
                 if (result.error) {
@@ -28,12 +29,15 @@ class StripeForm extends React.Component {
                 } else {
                     authAxios
                         .post(subscribeURL, {
+                            /* pass stripe token into the request */
                             stripeToken: result.token.id
                         })
                         .then(res => {
                             this.setState({
                                 loading: false
                             });
+                            /* handleUserDetails passed from Billing.js  
+                            <WrappedStripeForm {...this.props} />*/
                             this.props.handleUserDetails();
                         })
                         .catch(err => {
@@ -46,12 +50,13 @@ class StripeForm extends React.Component {
                 }
             });
         } else {
-            console.log("Stripe js hasn't loaded yet");
+            console.log("Stripe has NOT loaded");
         }
     };
 
     render() {
-        const { loading, error } = this.state;
+        const { loading, error } = this.state
+
         return (
             <React.Fragment>
                 <Divider />

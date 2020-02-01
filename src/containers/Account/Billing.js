@@ -15,7 +15,7 @@ import Shell from './Shell'
 import imagePlaceHolder from '../../assets/images/facialrecognition.jpg'
 import { authAxios } from '../../utils'
 import { billingURL } from '../../constants'
-
+import SubscribeForm from './SubscribeForm'
 
 class Billing extends React.Component {
 
@@ -64,6 +64,7 @@ class Billing extends React.Component {
                         <p>
                             API requests amount this month: 20
                         </p>
+                        <SubscribeForm handleUserDetails={this.handleUserDetails} />
                     </React.Fragment>
                 )
                     :
@@ -85,11 +86,7 @@ class Billing extends React.Component {
                                 <p>
                                     Your free trial has ended
                                 </p>
-                                <Form>
-                                    <Form.Field>
-                                        <input placeholder='card details' />
-                                    </Form.Field>
-                                </Form>
+                                <SubscribeForm handleUserDetails={this.handleUserDetails} />
                             </React.Fragment>
                         )
                             : null

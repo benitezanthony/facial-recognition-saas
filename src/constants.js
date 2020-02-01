@@ -6,9 +6,11 @@ let stripePublishKey = "";
 
 if (!DEBUG) {
     host = "https://domain.com"
-    stripePublishKey = ""
+    stripePublishKey = "pk_test_MipcN5hmhAUD39m6gsC8QB6h001DTO0Ajv"
 }
 
+/* TEMPORARY, USED FOR TESTING SINCE DEBUG IS TRUE */
+stripePublishKey = "pk_test_MipcN5hmhAUD39m6gsC8QB6h001DTO0Ajv"
 export { stripePublishKey };
 
 export const APIEndpoint = `${host}/api`

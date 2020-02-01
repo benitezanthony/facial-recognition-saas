@@ -12,7 +12,7 @@ urlpatterns = [
     path("email/", UserEmailView.as_view(), name="email"),
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("billing/", UserDetailsView.as_view(), name="billing"),
-    path("subsribe/", SubscribeView.as_view(), name="subscribe"),
+    path("subscribe/", SubscribeView.as_view(), name="subscribe"),
 
 
 ]

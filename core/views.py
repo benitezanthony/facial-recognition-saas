@@ -124,7 +124,6 @@ class SubscribeView(APIView):
         # grab user from request
         user = get_user_from_token(request)
         # update user membership
-
         return Response({
             'test': True
         })
