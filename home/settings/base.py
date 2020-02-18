@@ -23,6 +23,8 @@ INSTALLED_APPS = [
     'rest_auth.registration',
     'rest_framework',
     'rest_framework.authtoken',
+
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -76,8 +78,25 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'demo': '24/day',
+        'anon': '24/day',
+        'user': '1000/day'
+    }
 }
 
+""" allows us to use our custom User class from models.py """
+AUTH_USER_MODEL = 'core.User'
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# stripe plan ID
+# from stripe dashboard, created a product a created an ID for that product
+STRIPE_PLAN_ID = 'facial_monthly_api_call'

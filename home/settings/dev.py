@@ -17,3 +17,6 @@ DATABASES = {
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
 )
+
+STRIPE_PUBLISH_KEY = 'pk_test_MipcN5hmhAUD39m6gsC8QB6h001DTO0Ajv'
+STRIPE_SECRET_KEY = 'sk_test_rKeO43zH2KhBW0XkpPI8jeaZ00ZoJfyW9f'

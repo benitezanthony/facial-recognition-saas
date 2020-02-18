@@ -15,14 +15,14 @@ class LoginForm extends React.Component {
   state = {
     username: "",
     password: "",
-    formError: null
+    formError: null,
   };
 
   handleChange = e => {
     this.setState({
       [e.target.name]: e.target.value,
       /* use to reset error messages when user begins typing */
-      formError: null
+      formError: null,
     });
 
   };

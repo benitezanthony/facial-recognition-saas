@@ -68,7 +68,7 @@ class StripeForm extends React.Component {
                     loading={loading}
                     disabled={loading}
                     onClick={this.submit}>
-                    Go pro
+                    Go Pro
                 </Button>
             </React.Fragment>
         );

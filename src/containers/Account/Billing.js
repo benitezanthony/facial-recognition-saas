@@ -2,19 +2,18 @@ import React from 'react'
 import {
     Segment,
     Header,
-    Divider,
     Icon,
     Dimmer,
     Loader,
     Image,
-    Form,
-    Button
-
+    Button,
+    Modal,
+    Divider
 } from 'semantic-ui-react'
 import Shell from './Shell'
-import imagePlaceHolder from '../../assets/images/facialrecognition.jpg'
+import imagePlaceHolder from '../../assets/images/imagePlaceHolder.png'
 import { authAxios } from '../../utils'
-import { billingURL } from '../../constants'
+import { billingURL, cancelSubscriptionURL } from '../../constants'
 import SubscribeForm from './SubscribeForm'
 
 class Billing extends React.Component {
@@ -23,10 +22,37 @@ class Billing extends React.Component {
         error: null,
         loading: false,
         billingDetails: {},
+        open: false,
     }
 
     componentDidMount() {
         this.handleUserDetails()
+    }
+
+    show = (size) => () => this.setState({ size, open: true })
+    close = () => this.setState({ open: false })
+
+    handleUnsubscribe = () => {
+        this.setState({
+            error: null,
+            loading: true,
+        })
+        authAxios.post(cancelSubscriptionURL)
+            .then(res => {
+                this.setState({
+                    loading: false,
+                })
+                /* closes the modal */
+                this.close()
+                /* reload profile information */
+                this.handleUserDetails()
+            })
+            .catch(err => {
+                this.setState({
+                    error: err.response.data.message,
+                    loading: false,
+                })
+            })
     }
 
     handleUserDetails = () => {
@@ -59,10 +85,20 @@ class Billing extends React.Component {
                 {details.membershipType === free_trial ? (
                     <React.Fragment>
                         <p>
-                            Your free trial ends on June 19 2020
+                            {/* Used to created blank space 
+                            Use \xa0 - it is a NO-BREAK SPACE char.*/}
+                            Your free trial ends on: {'\xa0'}
+                            <b>
+                                {new Date(details.free_trial_end_date).toDateString()}
+                            </b>
                         </p>
                         <p>
-                            API requests amount this month: 20
+                            {/* Used to created blank space 
+                            Use \xa0 - it is a NO-BREAK SPACE char.*/}
+                            API requests amount this month: {'\xa0'}
+                            <b>
+                                {details.api_request_count}
+                            </b>
                         </p>
                         <SubscribeForm handleUserDetails={this.handleUserDetails} />
                     </React.Fragment>
@@ -71,14 +107,30 @@ class Billing extends React.Component {
                     details.membershipType === member ? (
                         < React.Fragment >
                             <p>
-                                Next billing date: 25 June 2019
+                                {/* Used to created blank space 
+                                Use \xa0 - it is a NO-BREAK SPACE char.*/}
+                                Next billing date: {'\xa0'}
+                                <b>
+                                    {new Date(details.next_billing_date).toUTCString()}
+                                </b>
                             </p>
                             <p>
-                                API requests amount this month: 20
+                                {/* Used to created blank space 
+                                Use \xa0 - it is a NO-BREAK SPACE char.*/}
+                                API requests amount this month: {'\xa0'}
+                                <b>
+                                    {details.api_request_count}
+                                </b>
                             </p>
                             <p>
-                                Amount Due: $20
+                                Amount Due: {'\xa0'}
+                                <b>
+                                    $ {details.amount_due}
+                                </b>
                             </p>
+                            <Divider />
+                            <Button onClick={this.show('mini')}>Cancel Subscription</Button>
+
                         </React.Fragment>
                     )
                         : details.membershipType === not_member ? (
@@ -98,40 +150,58 @@ class Billing extends React.Component {
 
     render() {
 
-        const { error, loading, billingDetails } = this.state
+        const { error, loading, billingDetails, open, size } = this.state
 
         return (
-            <Shell>
-                {/* if there's an error */}
-                {error && (
-                    <Segment placeholder>
-                        <Header icon><Icon name='rocket' />
-                            Could not fetch account details. Try reloading the page
+            <React.Fragment>
+                <Shell>
+                    {/* if there's an error */}
+                    {error && (
+                        <Segment placeholder>
+                            <Header icon><Icon name='rocket' />
+                                Could not fetch account details. Try reloading the page
                         </Header>
-                        {/* a tag is used to reload the page */}
-                        <a href='/account/billing/'>
-                            <Button primary>
-                                Reload
+                            {/* a tag is used to reload the page */}
+                            <a href='/account/billing/'>
+                                <Button primary>
+                                    Reload
                         </Button>
-                        </a>
+                            </a>
 
-                    </Segment>
-                )}
-                {/* if loading */}
-                {loading && (
-                    <Segment>
-                        <Dimmer active inverted>
-                            <Loader inverted>
-                                Face Recognition
-                            </Loader>
-                        </Dimmer>
-                        <Image src={imagePlaceHolder} />
-                    </Segment>
-                )}
-                {billingDetails && (
-                    this.renderBillingDetails(billingDetails)
-                )}
-            </Shell>
+                        </Segment>
+                    )}
+                    {/* if loading */}
+                    {loading && (
+                        <Segment>
+                            <Dimmer active inverted>
+                                <Loader />
+                            </Dimmer>
+                            <Image src={imagePlaceHolder} />
+                        </Segment>
+                    )}
+                    {billingDetails && (
+                        this.renderBillingDetails(billingDetails)
+                    )}
+                </Shell>
+
+                <Modal size={size} open={open} onClose={this.close}>
+                    <Modal.Header>Cancel your Subscription</Modal.Header>
+                    <Modal.Content>
+                        <p>Are you sure you want to cancel your subscription?</p>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button negative onClick={this.close}>No</Button>
+                        <Button
+                            positive
+                            icon='checkmark'
+                            labelPosition='right'
+                            content='Yes'
+                            onClick={this.handleUnsubscribe}
+                        />
+                    </Modal.Actions>
+                </Modal>
+            </React.Fragment>
+
         )
     }
 }

@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (FileUploadView, ChangeEmailView,
                     UserEmailView, ChangePasswordView, UserDetailsView,
-                    SubscribeView)
+                    SubscribeView, ImageRecognitionView, APIKeyView, CancelSubscriptionView)
 
 app_name = "core"
 
@@ -13,6 +13,8 @@ urlpatterns = [
     path("change-password/", ChangePasswordView.as_view(), name="change-password"),
     path("billing/", UserDetailsView.as_view(), name="billing"),
     path("subscribe/", SubscribeView.as_view(), name="subscribe"),
-
-
+    path("upload/", ImageRecognitionView.as_view(), name="image-recognition"),
+    path("api-key/", APIKeyView.as_view(), name="api-key"),
+    path("cancel-subscription/", CancelSubscriptionView.as_view(),
+         name="cancel-subscription"),
 ]

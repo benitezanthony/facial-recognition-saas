@@ -13,29 +13,56 @@ import {
     Dimmer
 } from 'semantic-ui-react'
 import axios from "axios"
+import { authAxios } from '../utils'
 import { fileUploadURL, facialRecognitionURL } from "../constants"
 import imagePlaceHolder from '../assets/images/facialrecognition.jpg'
-import testFaceImage from '../assets/images/face.png'
+import testFaceImage from '../assets/images/face.jpg'
 
 class Demo extends React.Component {
 
     state = {
         fileName: "",
         file: null,
-        error: null
+        error: null,
+        loading: false,
+        statusCode: null,
+        progress: 0,
+        spinner: false,
+        data: null,
     }
 
+
     handleFileChange = e => {
-        this.setState({
-            fileName: e.target.files[0].name,
-            file: e.target.files[0],
-            error: null,
-            loading: false,
-            statusCode: null,
-            progress: 0,
-            spinner: false,
-            data: null,
-        })
+        if (typeof e.target.files[0] == 'undefined') {
+            this.setState({
+                error: 'File selected undefined',
+                /* set file to be empty */
+                fileName: "",
+                file: null,
+                data: null,
+            })
+        }
+        /* check the size of the file is less than 5 megabytes, 5,000,000 bytes is 5 Megabytes */
+        else if (e.target.files[0].size > 5000000) {
+            this.setState({
+                error: 'Image size greater than 5 Megabytes (5 MB)',
+                /* set file to be empty */
+                fileName: "",
+                file: null,
+                data: null,
+            })
+        } else {
+            this.setState({
+                fileName: e.target.files[0].name,
+                file: e.target.files[0],
+                error: null,
+                loading: false,
+                statusCode: null,
+                progress: 0,
+                spinner: false,
+                data: null,
+            })
+        }
     }
 
     handleSubmit = e => {
@@ -47,7 +74,8 @@ class Demo extends React.Component {
         }
         else {
             this.setState({
-                error: "No file selected"
+                error: "No file selected",
+                data: null,
             })
         }
     }
@@ -82,7 +110,8 @@ class Demo extends React.Component {
         //axios, post the dictionary(object) of form data
         /* we need to create an API endpoint for this component 
         create app: python manage.py startapp core*/
-        axios.post(fileUploadURL, formData, config)
+        /* axios */
+        authAxios.post(facialRecognitionURL, formData, config) /* fileUploadURL */
             .then(res => {
                 this.setState({
                     data: res.data,
@@ -117,7 +146,7 @@ class Demo extends React.Component {
                                     <Icon name="file" />
                                 </Button.Content>
                                 <Button.Content hidden>
-                                    Select a File (Max Size 2 MB)
+                                    Select a File (Max Size 5 MB)
                             </Button.Content>
                             </Button>
                             <input id="file" type="file" hidden

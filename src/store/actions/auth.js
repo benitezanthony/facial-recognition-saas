@@ -54,8 +54,14 @@ export const authLogin = (username, password) => {
         dispatch(checkAuthTimeout(3600));
       })
       .catch(err => {
-        dispatch(authFail(err.response.data.non_field_errors[0]));
-      });
+        /* check if undefined */
+        if (typeof err.response !== undefined) {/*                               
+          With this notation, you’ll never run into Cannot read property ‘.property' of undefined. 
+          You basically check if object exists,if not, you create an empty object on the fly. 
+          This way, the next level key will always be accessed from an object that 
+          exists or an empty object, but never from undefined. */}
+        dispatch(authFail((err.response.data || {}).non_field_errors[0]))
+      })
   };
 };
 
@@ -78,7 +84,13 @@ export const authSignup = (username, email, password1, password2) => {
         dispatch(checkAuthTimeout(3600));
       })
       .catch(err => {
-        dispatch(authFail(err.response.data.non_field_errors[0]));
+        /* check if undefined */
+        if (typeof err.response !== undefined) {/*                               
+        With this notation, you’ll never run into Cannot read property ‘.property' of undefined. 
+        You basically check if object exists,if not, you create an empty object on the fly. 
+        This way, the next level key will always be accessed from an object that 
+        exists or an empty object, but never from undefined. */}
+        dispatch(authFail((err.response.data || {}).non_field_errors[0]))
       });
   };
 };
