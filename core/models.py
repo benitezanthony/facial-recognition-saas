@@ -1,11 +1,13 @@
 import stripe
 from django.conf import settings
+from django.contrib.auth.signals import user_logged_in
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 ''' when we signup, we need to create stripe customer and membership, meaning
 we need to use post_save db signal'''
 from django.db.models.signals import post_save
 from django.utils import timezone
+import datetime
 
 
 ''' apikey imported from dev.py and obtained from stripe dashboard'''
@@ -72,7 +74,6 @@ class TrackedRequest(models.Model):
 def post_save_user_receiver(sender, instance, created, *args, **kwargs):
     ''' if user being created/saved, create customer and membership '''
     if created:
-        import datetime
         ''' customer is the return of the API call '''
         customer = stripe.Customer.create(email=instance.email)
         ''' instance or actual user model '''
@@ -89,5 +90,38 @@ def post_save_user_receiver(sender, instance, created, *args, **kwargs):
         )
 
 
+""" call a signal every time a user logs in, we'll evaluate status of account or check
+if the end date of their free trial passed, if it did, update their user model (staus on free trial) """
+
+
+def user_logged_in_receiver(sender, user, request, **kwargs):
+    membership = user.membership
+    if user.on_free_trial:
+        # if membership expired
+        if membership.end_date < timezone.now():
+            # remove trial status
+            user.on_free_trial = False
+            user.save()
+    elif user.is_member:
+        # get stripe subscription
+        sub = stripe.Subscription.retrieve(
+            membership.stripe_subscription_id)
+        if sub.status == 'active':
+            membership.end_date = datetime.datetime.fromtimestamp(
+                sub.current_period_end
+            )
+            # in case is_member was somehow set False
+            user.is_member = True
+        else:
+            user.is_member = False
+    else:
+        pass
+
+    user.save()
+    membership.save()
+
+
 ''' link receiver to post_save '''
 post_save.connect(post_save_user_receiver, sender=User)
+# dont need to pass sender because it is already linked to user
+user_logged_in.connect(user_logged_in_receiver)
